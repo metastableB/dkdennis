@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Experience:Summer 2015 </title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../../css/clean-blog.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="../../../index.php">metastableB</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../index.php">Home</a>
+                    </li>
+                    <li>
+                        <a href="../../index.html">Blog</a>
+                    </li>
+                    <!--<li>
+                        <a href="post.html">Sample Post</a>
+                    </li>!-->
+                    <li>
+                        <a href="../../contact.html">Contact</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" style="background-image: url('../../img/firstpage-bg.jpg')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Summer 2015 : Experience [WARNING :not complete ]</h1>
+                        <h2 class="subheading">There were highs and lows.</h2>
+                        <span class="meta">Last Update on May 2, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <h3 style="font-size: 50px;color: rgb(103, 123, 83);">Week 0 </h3>
+                    <h4>Day 3 : 2 May, 2015</h4>
+                    So yeah, a quick note to get hadoop and getting your first program running.
+                    	<ul>                    
+                    	 <li> Get the latest jdk </li>
+                    	 <li> Get the latest hadoop library </li>
+                    	</ul>
+                    These are the easy parts. You can follow <a href="http://www.tutorialspoint.com/hadoop/hadoop_big_data_overview.htm" style="color:#E1AF20;">this</a> tutorial for setting the above two up. 
+
+                    <p>The next big thing is making sure you have all the environment variables set correctly. First verify that jdk is set up correctly. Type the following in the terminal
+                    <pre align="center"> $ java -version </pre>
+                    <p>If you get the correct version of java on your screen then you are good to go. On the other hand if you get something like <i> the app java is not installed..</i>, it means your jdk files were not found. What you have to do is add the bin folder in the jdk installation to the $PATH variable.</p>
+                    <p>The bin folder will be inside your jdk folder. For my Ubuntu distribution, I extracted the jdk package to <i>/usr/local/jdk1.8.0_45</i>. So within this folder, I have my bin folder( i.e. the folder holding the binaries). Once we have this location we add it to the $PATH variable. To do this, do
+                    <pre align="center" > $ export PATH=$PATH:/Path/to/your/java/bin</pre>
+                    Remember that this export is not persistent, and that once you close your terminal session the $PATH variable will be reset to its original state. You can do a simple Google search to find out how to make this change persistent - which usually is accomplished by editing the .bashrc file. I'll leave you to it.Make sure to verify that the $PATH is correctly set by issuing the first command again.</p>
+
+                    <p>The next step is verifying our hadoop installation is running correctly. I assume you followed the above mentioned <a href="http://www.tutorialspoint.com/hadoop/hadoop_big_data_overview.htm" style="color:#E1AF20;"> tutorial </a> and were able to set up hadoop correctly</p>
+
+                    <p>We now need to set the $CLASSPATH variable. For that , on a terminal prompt type
+                    <pre align="center" > $ hadoop classpath</pre>
+                    to obtain the necessary classpaths. Add the required classes to the CLASSPATH variable using the export command.
+                    <br><br>
+                    <pre align="center" > $ export CLASSPATH=/paths/to/the/classes/you/are/using</pre></p>
+                    <p>We now require our java, mapreduce code compiled. Using standard java compilation techniques here. Make sure you have set the CLASSPATH correctly otherwise the compiler will complain about unknown types and other such errors. Also, in case you are using a package, make sure the directory structure is made appropriately.<p>
+
+                    <p>Finally to run the mapreduce code you need to set the $HADOOP_CLASSPATH variable so that hadoop can pick up the classes it has to run. The variable should be set to the directory containing the compiled classes (or jar files, but we will get to that later). Once you have the $HADOOP_CLASSPATH set you can use the following command to run your program.
+                   	<pre align="center" > $ hadoop &#60;MainClassName&#62</pre></p>
+
+
+
+                    <h4>Day 2 : 1 May, 2015</h4>
+                    </p>Hadoop: The Definitive Guide, Third Edition has been a definite help in setting up hadoop and experimenting. At this point I'v my first map reduce implementation ready for testing. Its based on some data from <a href="http://www.ncdc.noaa.gov/" style="color:#E1AF20;"> NCDC</a>. As of now I'm experimenting with a small sample data set hence have not hit the performance bottle neck yet. I'm performing the same operations that I'm doing on hadoop on a script using a simple <a href="http://www.grymoire.com/Unix/Awk.html" style="color:#E1AF20">awk</a> code. This is so that I have a bench mark to compare the results. I later plan to implement this using a C code so that I have a better running time analysis.</p>
+
+                    <p>Day 2 hasn't been satisfactory productivity wise. The entire day was spent on fixing a minor bug in my code, which was not even related to hadoop. Eventually, I had to go to Dr. Bera (my mentor for this project) to get it fixed. This is why I hate returning to a languages after a long time, there is always that one small little thing you forget that causes you to spend at least a few hours debugging. This does not happen in new languages or languages you are comfortable in. On the flip side, by the end of the summer, I probably can say that I have command over both C++ as well as Java along with C.
+                    </p>
+                    </p>At the end of day 2, I have my first running hadoop mapreduce program. And am able to run at least some analysis on the data sets I have. More to come on the coming days. Also got my blog running. FINALLY!
+                    </p>
+                    <p style="color:grey;"><i> Random Thought : Remember the <a href="http://xkcd.com/903/" style="color:#E1AF20;">xkcd comic</a> about how each Wikipedia article eventually terminates at the philosophy article. That is, if you keep clicking on the first "live link" (not translations, pronunciation, warning, missing link etc) on each page and keep going, you will eventually reach the Philosophy article. </i></p>
+                    <p style="color:grey;"><i> Well the entire Wikipedia is available as a torrent which is about ~50GB in size. Analysing the above statement is basically deploying a crawler into the pages, treating them as a map - each page being a node an each live link being an edge and basically what you want is a DFS from the philosophy node. You can do fun things here - calculating the percentage of nodes(pages) discoverable, the average distance from philosophy, medians, modes, media occurrence vs type of article, time lines etc etc.</i></p>
+                    <p style="color:grey;"><i>This seems doable though is a major project in itself, especially since I have no idea how the crawler system works. I though have a feeling that reading the files like any regular file and searching for links satisfying the "live link" category should work.Lets put this on a TODO list.</i></p>
+
+                    <h4> Day 1 : 30 May, 2015</h4>
+                    </p>It seems that the above mentioned link, being informative as it is, still does not get you going a hadoop setup on your local machine. <a href="http://www.tutorialspoint.com/hadoop/hadoop_big_data_overview.htm" style="color:#E1AF20;">This </a>tutorial on the other hand does exactly that. I was able to set up a single node hadoop infrastructure by following instructions on this link. The exact commands there are a little outdated and some not even compatible with many Linux Destros, but anyone with a basic understanding of the UNIX system should be able to get the process done correctly.</p>
+
+                    </p>At this point, I really dont have a very good picture of hadoop - how and why it works etc, other than the general over the top view presented on a host of articles on the web. These will in fact give you a picture of what hadoop actually is albeit an extremely abstracted one.</p>
+                     <h4> Day 0 : 29 May, 2015</h4>
+                     <p> Arrived today here at IIIT Delhi, 12 hour late train! </p>
+                   <p> Week 0 will be used up for  setting up the development environment and getting familiar with the physical environment. I started of with performing a clean install of Ubuntu 14.04 on my machine. Just so that there are lesser bugs and errors to fix. Currently I have a fully up-to-date system with the latest JDK and IDEs set up. </p>
+
+                    </p>As for Hadoop, which according to the Internet masses has a steep learning curve, I'v found <a href="http://www.cloudera.com/content/cloudera/en/developers/home/developer-admin-resources/get-started-with-hadoop-tutorial.html" style="color:#E1AF20;">this</a> particular resource extremely useful. A proper beginners guide to Hadoop and other related things doesn't seem to be available, which is understandable, though I hope this article will serve that purpose once I'm finished here. Currently I'm experimenting with the above mentioned resource and hope to set up a basic hadoop infrastructure soon (i.e a VM based infrastructure). </p>
+                    </div>
+            </div>
+        </div>
+    </article>
+
+    <hr>
+
+      <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+<!--                        <li>
+                            <a href="http://www.facebook.com">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://www.facebook.com">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+-->                       </li>
+                        <li>
+                            <a href="https://github.com/metastableB">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="copyright text-muted">Don Dennis 2015</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="../../js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../../js/bootstrap.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../../js/clean-blog.min.js"></script>
+
+</body>
+
+</html>
