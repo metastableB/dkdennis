@@ -104,6 +104,7 @@
 					<b>The page is under development<br></b>
 					<b>Thanks for your visit though!<br></b>
 					<b>Cheers :)</b>
+          <p>Here for my <a href="blog/" style="color:Gray;">blog</a>?</p>
 				    <b></b>
                                 </td>
                             
