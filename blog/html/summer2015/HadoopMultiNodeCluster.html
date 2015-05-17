@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Cluster Setup</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../../css/clean-blog.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="../../../index.php">metastableB</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../index.php">Home</a>
+                    </li>
+                    <li>
+                        <a href="../../index.html">Blog</a>
+                    </li>
+                    <!--<li>
+                        <a href="post.html">Sample Post</a>
+                    </li>!-->
+                    <li>
+                        <a href="../../contact.html">Contact</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" style="background-image: url('../../img/firstpage-bg.jpg')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Hadoop Yarn: Setting Up A Multinode Setup</h1>
+                        <span class="meta">Last Update on May 2, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <h3 style="font-size: 50px;color: rgb(103, 123, 83);"></h3>
+                    
+                    <p>For one of the summer projects I did in the summer of 2015, I had to work on a multi node cluster setup of hadoop. Hadoop and clusters were something totally new to me and setting everything up was a slightly difficult task, through this process I was able to learn a lot. Here I'll try to document the steps I took to set up a cluster. This article is intended for all those who are trying to learn how to use hadoop over a cluster and experiment with it. This does not, in any way cover all aspects of the installation, the different configuration options, their impact , the security aspects etc. What you'll have here is an introduction of sort, a stepping stone towards your ventures into the BigData field.</p>
+
+                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">0 : Some Background Information</h4>
+
+                    <p>The hadoop cluster set up requires a number of configuration modification which depend on you particular case. I had access to 9 VMs for my project. All with a clean install of ubuntu 14.04 on them. So I'll explain on basis of my case. Though with some understanding and slight modifications these can be adapted to any Linux distro of your choice.</p>
+
+                    <p>I did all my operations by SSH-ing into the VMs from my home machine which I did not make a part of the cluster itself. Though the same method applies even if you want it to be a part of the cluster.</p>
+
+                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">1 : Environment</h4>
+
+                    <p> As mentioned above I used
+                    	<ul>
+                    		<li>Linux (ubuntu 14.04)</li>
+                    		<li>Hadoop 2.7.0 (yarn) </li>
+                    		<li>java 1.8.0_45</li>
+                    	</ul>
+                    Though this tutorial will still be valid for any Linux distro and Hadoop Yarn version (2.x). </p>
+
+                    <p>The usual set-up first designated one of the node as NameNode and others as DataNodes. Since I had 10 VMs, I used 1 of them as a NameNode (as well as the resource manager as we will see later) and 8 others as DataNode. I sat aside 1 VM as a single node setup for other testing purposes (irrelevant here).</p>
+
+                    <p>In case you have fewer node, you might want to run a DataNode daemon on you NameNode machine as well. I'll mention below what all the changes you will have to make (there is just one change actually). </p>
+
+                    The IPs of my machines are given below and my configuration will be with respect to these IPs. <b style="color:red">NOTE: Make sure to change the IPs according to your own machines</b>
+                    <pre>192.168.1.241&nbsp;&nbsp;&nbsp;&nbsp;Master(NameNode)
+                    <br>192.168.1.242&nbsp;&nbsp;&nbsp;&nbsp;Slave (DataNode)
+                    <br>192.168.1.243&nbsp;&nbsp;&nbsp;&nbsp;Slave (DataNode)
+                    <br>192.168.1.244&nbsp;&nbsp;&nbsp;&nbsp;Slave (DataNode)
+                    <br>192.168.1.245&nbsp;&nbsp;&nbsp;&nbsp;Slave (DataNode)
+                    <br>192.168.1.246&nbsp;&nbsp;&nbsp;&nbsp;Slave (DataNode)
+                    <br>192.168.1.247&nbsp;&nbsp;&nbsp;&nbsp;Slave (DataNode)
+                    <br>192.168.1.248&nbsp;&nbsp;&nbsp;&nbsp;Slave (DataNode)
+                    <br>192.168.1.249&nbsp;&nbsp;&nbsp;&nbsp;Slave (DataNode)
+                    </pre>
+
+	                <p>
+                    <h5>1.0 &nbsp;:&nbsp;Adding System group and user account for all nodes</h5>
+                    </p>
+
+                    <p>Adding a new system group and user is recommended so that your hadoop setup and filesytem remain isolated from other system users. You can skip this step if you are absolutely sure this wont be necessary ( I personally did not bother do set this up, again not recommended).
+                    </p>
+                    <p>To set up a new user hadoop in the hduser, follow the following commands in all nodes<p>
+                    <pre>sudo addgroup hadoop  
+					<br>sudo adduser --ingroup hadoop hduser  
+					<br>sudo adduser hduser sudo</pre>
+
+					<p>Make sure you understand the above commands and what they are doing. For all the next steps make sure you are logged in as 'hadoop' on all nodes</p>
+
+					<p>
+                    <h5>1.1 &nbsp;:&nbsp;Make sure the new users can ssh into its own account in all nodes</h5>
+                    </p>
+                    <p>Make sure SSH access is provided to local nodes as well.</p>
+
+
+
+                    In this post I'll be discussing about how I set up ( and hopefully you can set up) hadoop in standalone mode.
+                    I'm using a linux system (ubuntu 14.04). I'm assuming you have played with the <a href="HadoopStandaloneTutorial.html" style="color: rgb(255, 207, 40);">stand-alone mode </a>installation of hadoop yarn and have some idea of how everything works.
+                    	</p>
+
+                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;"></h4>
+
+                    <p>One of the major problems beginners may face with the hadoop  will be due to the various versions of hadoop out there and the subtle differences among them. Many tutorials on how to set up a stand alone machine are available though all of them may be for versions different from the one you have.</p>
+
+                    <p>Specifically, I'll be talking about hadoop 2.7 , though the following steps should hold for any hadoop 2.x (yarn) version - atleast for the standalone setup </p>
+
+                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">Step 0 : Setting up the environment </h4>
+
+                    <p><b>0.1</b></p><p> It is recommend that you create a separate user to run hadoop so that we can isolate hadoop filesystem changes from the UNIX system.</p>
+
+                    <p>To create a new user, use the <i>useradd</i> command. You may have to login with root privileges for this. You can use <i> su (sudo -i on ubuntu)</i> for this.</p>
+
+                    <p>Lets create a user hadoop.</p>
+
+
+                    <pre>sudo -i</pre>
+                    <pre>useradd hadoop</pre>
+
+
+                    <p>You will be prompted for entering the root password after the first command. </p>
+
+                    <p><b>0.2</b></p>
+                    <p> One you have the user account, we can proceed to installing java on your system. Remember to perform all the following steps with the new user account.<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" style="color: rgb(255, 207, 40);">Download</a> the latest jdk. Extract it  within the home folder (or any location of your choice). I prefer to keep java in my <i>/usr/local/</i> directory. There for after extracting the .tar.gz file I downloaded to a folder in my home directory, say jdk1.8.0_45, I move it to my /usr/local directory.
+                    </p>
+                    <pre>sudo mv -v /home/hadoop/jdk1.8.0_45 /usr/local</pre>
+                    <p>The -v flag for verbose output (prints a lot on the screen as you will see).</p>
+
+                    <p>Once you have java, you need to tell your environment that you have java. For that we set two environment variables, namely <i>$PATH</i> and <i>$JAVA_HOME</i>. We export the java installation directory and set the environment variables.</p>
+
+                    <pre>export JAVA_HOME=/usr/local/jdk1.8.0_45<br>export PATH=$PATH:/usr/local/jdk1.8.0_45/bin:/usr/local/jdk1.8.0_45/sbin</pre>
+
+                    <p>Remember that these changes are not persistent and are lost once the current terminal session is over. To have persistent effect, we have to add these lines to the shell profile file. In ubuntu this is the ~/.bashrc file. Open this file in your favourite editor and append the above two lines to the end. </p>
+                    <pre>nano ~./bashrc <br># Append the following to the end<br>export JAVA_HOME=/usr/local/jdk1.8.0_45<br>export PATH=$PATH:/usr/local/jdk1.8.0_45/bin:/usr/local/jdk1.8.0_45/sbin</pre>
+
+                    <p>Make sure to change the installation path according to where you have set java.</p>
+
+                    <p>As a side note, if you have to extract the .tar.gz, use the tar program with its extract flag. That is </p>
+                    <pre>tar xvzf filename.tar.gz </pre>
+
+                    <p>Now check if java is installed correctly on your machine with the following command. It should print the java version. You may have to restart the terminal session for your changes to the .bashrc file (if any) to take effect.</p>
+                    <p><pre>java -version</pre></p>
+                    
+                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">Step 1 : Getting Hadoop </h4>
+                    <p>Download the latest hadoop stable version form the <a href="http://apache.claz.org/hadoop/common/" style="color: rgb(255, 207, 40);">apache webpage.</a>  Extract it to a directory of your choice within the file system. A very common and highly recommended choice is /opt/. Extract the contents of the file you downloaded to a new folder in /opt/ named hadoop. Make sure the user we created above, hadoop, has read write permissions to this folder</p>
+
+                    <pre># To download the file you can use <br> wget http://apache.claz.org/hadoop/common/hadoop-2.7.0/hadoop-2.7.0.tar.gz
+                    <br># To extract the contents of the tar.gz file use<br>tar xvzf hadoop-2.7.0.tar.gz 
+                    <br># To move the extracted contents to /opt/hadoop use <br> mv -v hadoop-2.7.0/* opt/hadoop
+                    </pre>
+
+                    <p>Now, as with java, we have to tell the environment that we have setup hadoop. For the standalone installation we set the following variables. $HADOOP_HOME , $PATH. As done above export the hadoop installation directory and set the environment variables</p>
+
+                    <pre>export HADOOP_HOME=/opt/hadoop<br>export PATH=$PATH:/opt/hadoop/bin:/opt/hadoop/sbin</pre>
+
+                    <p>Again, remember that these changes are not persistent and are lost once the current terminal session is over. To have persistent effect, we have to add these lines to the shell profile file. In ubuntu this is the ~/.bashrc file. Open this file in your favourite editor and append the above two lines to the end. </p>
+                    <pre>nano ~./bashrc <br># Append the following to the end<br>export HADOOP_HOME=/opt/hadoop<br>export PATH=$PATH:/opt/hadoop/bin:/opt/hadoop/sbin</pre>
+
+                    <p>Verify the hadoop installation by printing the hadoop version</p>
+                    <pre>hadoop version</pre>
+                    <p>The hadoop installation setup is not complete here and we need to set two more environment variables, the $CLASSPATH variable and the $HADOOP_HOME variable. We will discuss that later.</p>
+
+                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">Step 2 : Examples </h4>
+
+                    <p>We have a slightly different way of running examples in the stand alone installation and the pseudo-distributed or the cluster setup. It is essential that you understand the hadoop application run process so that debugging possible errors is easier. </p>
+
+                    <p>This hadoop setup can run class files as well as jar files. As an example, lets run a example which comes with the hadoop installation. This is a basic mapreduce job which couts the words in an input file set. </p> 
+
+                    <pre>hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduceexamples-2.2.0.jar  wordcount INPUT OUTPUT</pre>
+
+                    <p>Where INPUT is the input file (or directory which I'm hoping you will create for the test) containing data to read from and OUTPUT is the output folder that will be created with the mapreduce output. A new file <i>output/part-r00000 </i>will be created with the word count output. Make sure the user has write permissions for the OUTPUT directory</p>
+
+                    <p>The <i>hadoop jar</i> command is used to run jar packages on hadoop. Since the file was already there we did not have to do much in this case. For running our own jobs we need to specify two additional environment variables as well. </p>
+
+                    <p>Firstly, to compile the java source codes we require the $CLASSPATH variable be set. This is so that javac can find the necessary hadoop libraries. If this is not set, your compiler will complain about unrecognised symbols. I usually append the following line to my .bashrc file - makes life simpler. The <i>hadoop classpath</i>  commands give information about the classpaths which might be required.</p>
+                    <pre> export CLASSPATH=$CLASSPATH:$(hadoop classpath)</pre>
+
+                    <p>Secondly, we have to set the $HADOOP_CLASSPATH variable to point to your classes so that hadoop can run them. You need not pack them into a jar file for a standalone set up. You can use a simple <i>hadoop</i> command instead of the <i>hadoop jar</i> command to run your class directly as you would do with java. Lets say my class files are in the following directory<br><i>/home/hadoop/project/SimpleMapReduceProject/</i><br>
+                    Where the SimpleMapReduceProject directory contains my class files (not included in a java package mind you). I will set my $HADOOP_CLASSPATH as follows.
+                    </p>
+                    <pre>export HADOOP_CLASSPATH=/home/hadoop/project/SimpleMapReduceProject/</pre>
+                    <p> And then run, my main class as </p>
+                    <pre>hadoop MainClass [args] </pre>
+                    <p>If you have your files in a package, make sure to point the HADOOP_CLASSPATH to the correct directory.</p>
+
+                    <p> That is about it then. I guess I have covered the basics. Not many things can go wrong in this setup if you have a basic idea of what you are doing. Make sure that java and hadoop are installed properly before proceding to the further steps.</p><p> While compiling your own classes if you face <i> symbol not found </i> errors, make sure that the $CLASSPATH is set correctly and the class containing whatever symbol java is talking about is included in it.</p>
+                    <p>If your hadoop complains about main class not being found on run, make sure that your $HADOOP_CLASSPATH variable is set to point to the correct directory. This might be a little tricky for beginners using packages and not entirely familiar with the concept.
+                    </p> <p>
+                    Please inform me if you spot any errors or can suggest any improvement to the article. You can email me at donkdennis [at] gmail [dot] com .</p>
+
+                  </div>
+            </div>
+        </div>
+    </article>
+
+    <hr>
+
+      <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+<!--                        <li>
+                            <a href="http://www.facebook.com">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://www.facebook.com">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+-->                       </li>
+                        <li>
+                            <a href="https://github.com/metastableB/bigDataExperiments">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="copyright text-muted">Don Dennis 2015</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="../../js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../../js/bootstrap.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../../js/clean-blog.min.js"></script>
+
+</body>
+
+</html>
