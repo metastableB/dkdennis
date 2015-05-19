@@ -77,7 +77,7 @@
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="post-heading">
                         <h1>Hadoop : Setting Up A StandAlone Installation</h1>
-                        <span class="meta">Last Update on May 2, 2015</span>
+                        <span class="meta">Last Update on May 14, 2015</span>
                     </div>
                 </div>
             </div>
@@ -100,45 +100,49 @@
 
                     <p>Specifically, I'll be talking about hadoop 2.7 , though the following steps should hold for any hadoop 2.x (yarn) version - atleast for the standalone setup </p>
 
-                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">Step 0 : Setting up the environment </h4>
+                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">Step 1 : Setting up the environment </h4>
 
-                    <p><b>0.1</b></p><p> It is recommend that you create a separate user to run hadoop so that we can isolate hadoop filesystem changes from the UNIX system.</p>
+                    <p><b><h5>1.1&nbsp;:&nbsp;Creating a dedicated user</h5></b></p><p> It is recommend that you create a separate user to run hadoop so that we can isolate hadoop filesystem changes from the UNIX system.</p>
 
                     <p>To create a new user, use the <i>useradd</i> command. You may have to login with root privileges for this. You can use <i> su (sudo -i on ubuntu)</i> for this.</p>
 
                     <p>Lets create a user hadoop.</p>
 
 
-                    <pre>sudo -i</pre>
-                    <pre>useradd hadoop</pre>
+                    <pre>$sudo -i</pre>
+                    <pre>$useradd hadoop</pre>
 
 
                     <p>You will be prompted for entering the root password after the first command. </p>
 
-                    <p><b>0.2</b></p>
-                    <p> One you have the user account, we can proceed to installing java on your system. Remember to perform all the following steps with the new user account.<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" style="color: rgb(255, 207, 40);">Download</a> the latest jdk. Extract it  within the home folder (or any location of your choice). I prefer to keep java in my <i>/usr/local/</i> directory. First extract the .tar.gz file you downloaded to a folder in your home directory, say jdk1.8.0_45, and then move it to your /usr/local directory. (or where ever you chose to move it to, but its better to stick to this directory).
+                    <p><h5>1.2&nbsp;&nbsp;Setting up java</h5></p>
+                    <p> One you have the user account, we can proceed to installing java on your system. Remember to perform all the following steps with the new user account.<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" style="color: rgb(255, 207, 40);"> Download</a> the latest jdk. Extract it  within the home folder (or any location of your choice). I prefer to keep java in my <i>/usr/local/</i> directory. First extract the .tar.gz file you downloaded to a folder in your home directory, say jdk1.8.0_45, and then move it to your /usr/local directory. (or where ever you chose to move it to, but its better to stick to this directory).
                     </p>
                     Downloading java
-                    <pre>$ wget http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-linux-x64.tar.gz</pre>
+                    <pre>$wget http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-linux-x64.tar.gz</pre>
                     Extracting it
-                    <pre>tar xvzf jdk-8u45-linux-x64.tar.gz</pre>
+                    <pre>$tar xvzf jdk-8u45-linux-x64.tar.gz</pre>
                     Moving to the /user/local directory.
-                    <pre>sudo mv -v /home/hadoop/jdk1.8.0_45 /usr/local</pre>
+                    <pre>$sudo mv -v /home/hadoop/jdk1.8.0_45 /usr/local</pre>
                     The -v flag for verbose output (prints a lot on the screen as you will see).
 
                     <p>Once you have java, you need to tell your environment that you have java. For that we set two environment variables, namely <i>$PATH</i> and <i>$JAVA_HOME</i>. We export the java installation directory and set the environment variables.</p>
 
-                    <pre>export JAVA_HOME=/usr/local/jdk1.8.0_45<br>export PATH=$PATH:/usr/local/jdk1.8.0_45/bin:/usr/local/jdk1.8.0_45/sbin</pre>
+                    <pre>$export JAVA_HOME=/usr/local/jdk1.8.0_45<br>$export PATH=$PATH:/usr/local/jdk1.8.0_45/bin:/usr/local/jdk1.8.0_45/sbin</pre>
 
-                    <p>Remember that these changes are not persistent and are lost once the current terminal session is over. To have persistent effect, we have to add these lines to the shell profile file. In ubuntu this is the ~/.bashrc file. Open this file in your favourite editor and append the above two lines to the end. </p>
+                    <p>Remember that these changes are not persistent and are lost once the current terminal session is over. To have persistent effect, we have to add these lines to the shell profile file. In ubuntu this is the ~/.bashrc file (/home/hadoop/.bashrc). Open this file in your favourite editor and append the above two lines to the end. </p>
                     <pre>nano ~./bashrc <br># Append the following to the end<br>export JAVA_HOME=/usr/local/jdk1.8.0_45<br>export PATH=$PATH:/usr/local/jdk1.8.0_45/bin:/usr/local/jdk1.8.0_45/sbin</pre>
 
                     Make sure to change the installation path according to where you have set java.
 
                     <p>Now check if java is installed correctly on your machine with the following command. It should print the java version. You may have to restart the terminal session for your changes to the .bashrc file (if any) to take effect.</p>
                     <p><pre>java -version</pre></p>
+                    Sample output:
+                    <pre>java version "1.8.0_45"
+Java(TM) SE Runtime Environment (build 1.8.0_45-b14)
+Java HotSpot(TM) 64-Bit Server VM (build 25.45-b02, mixed mode)</pre><br>
                     
-                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">Step 1 : Getting Hadoop </h4>
+                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">Step 2 : Getting Hadoop </h4>
                     <p>Download the latest hadoop stable version form the <a href="http://apache.claz.org/hadoop/common/" style="color: rgb(255, 207, 40);">apache webpage.</a>  Extract it to a directory of your choice within the file system. A very common and highly recommended choice is /opt/. Extract the contents of the file you downloaded to a new folder in /opt/ named hadoop. Make sure the user we created above, hadoop, has read write permissions to this folder</p>
 
                     To download the file you can use
@@ -150,16 +154,24 @@
 
                     <p>Now, as with java, we have to tell the environment that we have setup hadoop. For the standalone installation we set the following variables. $HADOOP_HOME , $PATH. As done above export the hadoop installation directory and set the environment variables</p>
 
-                    <pre>export HADOOP_HOME=/opt/hadoop<br>export PATH=$PATH:/opt/hadoop/bin:/opt/hadoop/sbin</pre>
+                    <pre>$export HADOOP_HOME=/opt/hadoop<br>$export PATH=$PATH:/opt/hadoop/bin:/opt/hadoop/sbin</pre>
 
                     <p>Again, remember that these changes are not persistent and are lost once the current terminal session is over. To have persistent effect, we have to add these lines to the shell profile file. In ubuntu this is the ~/.bashrc file. Open this file in your favourite editor and append the above two lines to the end. </p>
-                    <pre>nano ~./bashrc <br># Append the following to the end<br>export HADOOP_HOME=/opt/hadoop<br>export PATH=$PATH:/opt/hadoop/bin:/opt/hadoop/sbin</pre>
+                    <pre>$nano ~./bashrc <br># Append the following to the end<br>export HADOOP_HOME=/opt/hadoop<br>export PATH=$PATH:/opt/hadoop/bin:/opt/hadoop/sbin</pre>
 
                     <p>Verify the hadoop installation by printing the hadoop version</p>
                     <pre>hadoop version</pre>
+                    Sample output:
+                    <pre>Hadoop 2.7.0
+Subversion https://git-wip-us.apache.org/repos/asf/hadoop.git -r d4c8d4d4d203c934e8074b31289a28724c0842cf
+Compiled by jenkins on 2015-04-10T18:40Z
+Compiled with protoc 2.5.0
+From source with checksum a9e90912c37a35c3195d23951fd18f
+This command was run using /usr/local/hadoop/share/hadoop/common/hadoop-common-2.7.0.jar
+</pre>
                     <p>The hadoop installation setup is not complete here and we need to set two more environment variables, the $CLASSPATH variable and the $HADOOP_HOME variable. We will discuss that later.</p>
 
-                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">Step 2 : Examples </h4>
+                    <h4 style="color: rgb(34, 237, 122); font-size: 25px;">Step 3 : Examples </h4>
 
                     <p>We have a slightly different way of running examples in the stand alone installation and the pseudo-distributed or the cluster setup. It is essential that you understand the hadoop application run process so that debugging possible errors is easier. </p>
 
@@ -171,10 +183,10 @@
 
                     <p>The <i>hadoop jar</i> command is used to run jar packages on hadoop. Since the file was already there we did not have to do much in this case. For running our own jobs we need to specify two additional environment variables as well. </p>
 
-                    <p>Firstly, to compile the java source codes we require the $CLASSPATH variable be set. This is so that javac can find the necessary hadoop libraries. If this is not set, your compiler will complain about unrecognised symbols. I usually append the following line to my .bashrc file - makes life simpler. The <i>hadoop classpath</i>  commands give information about the classpaths which might be required.</p>
+                    <p>Firstly, to compile the java source codes we require the $CLASSPATH variable be set. This is so that javac can find the necessary hadoop libraries. If this is not set, your compiler will complain about unrecognised symbols. I usually append the following line to my .bashrc file - makes life simpler. The <i>hadoop classpath</i>  command give information about the classpaths which might be required.</p>
                     <pre> export CLASSPATH=$CLASSPATH:$(hadoop classpath)</pre>
 
-                    <p>Secondly, we have to set the $HADOOP_CLASSPATH variable to point to your classes so that hadoop can run them. You need not pack them into a jar file for a standalone set up. You can use a simple <i>hadoop</i> command instead of the <i>hadoop jar</i> command to run your class directly as you would do with java. Lets say my class files are in the following directory<br><i>/home/hadoop/project/SimpleMapReduceProject/</i><br>
+                    <p>Secondly, we have to set the $HADOOP_CLASSPATH variable to point to your classes so that hadoop can run them. You need not pack them into a jar file for a standalone set up. You can use the <i>hadoop</i> command instead of the <i>hadoop jar</i> command to run your class directly as you would do with java. Lets say my class files are in the following directory<br><i>/home/hadoop/project/SimpleMapReduceProject/</i><br>
                     Where the SimpleMapReduceProject directory contains my class files (not included in a java package mind you). I will set my $HADOOP_CLASSPATH as follows.
                     </p>
                     <pre>export HADOOP_CLASSPATH=/home/hadoop/project/SimpleMapReduceProject/</pre>
