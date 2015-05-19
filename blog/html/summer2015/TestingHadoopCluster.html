@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Cluster Debugging</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../../css/clean-blog.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="../../../index.php">metastableB</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../index.php">Home</a>
+                    </li>
+                    <li>
+                        <a href="../../index.html">Blog</a>
+                    </li>
+                    <!--<li>
+                        <a href="post.html">Sample Post</a>
+                    </li>!-->
+                    <li>
+                        <a href="../../contact.html">Contact</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" style="background-image: url('../../img/firstpage-bg.jpg')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Hadoop Yarn: Testing and Debugging Your Cluster</h1>
+                        <span class="meta">Last Update on May 19, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <h3 style="font-size: 50px;color: rgb(103, 123, 83);"></h3>
+                                  
+                    <p>This is in continuation to the steps performed <a href="HadoopMultiNodeCluster.html" style="color: rgb(255, 207, 40);">here </a>to set up a basic hadoop cluster. You might want to skim over the article, if you haven't already before proceeding.</p>
+                    <p>What I'll discuss here are some errors I faced while setting up my cluster and how I navigated out of it. Further I'll also discuss some very basic debugging steps you can take to solve your own problems if you happen to have any</p>
+
+
+				   <h4 style="color: rgb(34, 237, 122); font-size: 25px;">1 &nbsp;:&nbsp;Testing Current Installation</h4>
+
+				   <p>Firstly, lets test the setup we build following <a href="HadoopMultiNodeCluster.html" style="color: rgb(255, 207, 40);">these</a> steps and see if everything is  up and running correctly.</p>
+				   <p><h5>1.1&nbsp;&nbsp;Formatting DFS</h5></p>
+                    <p>
+				   Format your newly setup distributed file system (HDFS)
+				   <pre> $hdfs namenode -format</pre>
+				   <p><h5>1.2&nbsp;&nbsp;Start HDFS daemons</h5></p>
+				   <p>For the initial testing lets start the DFS daemons manually on all nodes. I have included a script for you if you want to automate the process. Once we have made sure that all DFS demons are running on all nodes we can proceed to start the YARN daemons.</p>
+                   
+                    On the NameNode, to start DFS manually run :
+                    <pre>$hadoop-daemon.sh --script hdfs start namenode</pre>
+                    and on each slave node, run
+                    <pre>$hadoop-daemon.sh --script hdfs start datanode</pre>
+
+                    You can perform the same step by the following script as well.
+                    <pre>start-dfs.sh</pre>
+                    <p><h5>1.2&nbsp;&nbsp;Start YARN daemons</h5></p>
+                    To start yarn daemons on the namenode,perform
+                    <pre>$yarn-daemon.sh start resourcemanager</pre>
+                    and on the datanode,
+                    <pre>yarn-daemon.sh start nodemanager</pre>
+                    As with the dfs, we have a script for this as well.
+                    <pre>$start-yarn.sh</pre>
+                    <p><h5>1.3&nbsp;&nbsp;Verifying Daemons</h5></p>
+                    <p>If you have performed every step uptill now correctly, you should have your cluster up and running. Run the <i>jps</i> command on all
+                    nodes to see if the daemons have started correctly. Your output should be similar to the ones below.</p>
+                    On the namenode :
+                   <pre>1321 NameNode<br>1647 ResourceManager<br>1998 SecondaryNameNode</pre>
+                   and on the datanode
+                   <pre>21959 DataNode<br>22139 NodeManager</pre>
+
+                   Again this small script can be used to automate running the jps command on all nodes.
+                   <pre>#!/bin/bash
+
+# Don K Dennis (metastableB)
+# donkdennis [at] gmail.com
+# 15 May, 2015
+
+# This script attempts to login the IPs specified under HOST with USER one by one and
+# runs the jps program. This is helpful to see if all the hadoop daemons have started 
+# correctly on all the nodes
+
+# For adaptation please make sure to change USERNAME , HOSTS , SCRIPT according to your usecase 
+
+USERNAME=#
+HOSTS="192.168.1.241 192.168.1.242 192.168.1.243 192.168.1.244 192.168.1.245 192.168.1.246 192.168.1.247 192.168.1.248 192.168.1.249"
+SCRIPT="/usr/local/jdk1.8.0_45/bin/jps;"
+for HOSTNAME in ${HOSTS} ; do
+	echo "--------------------------"
+	echo "In " $HOSTNAME
+	ssh -l ${USERNAME} ${HOSTNAME} "${SCRIPT}"
+	echo "--------------------------"
+done</pre>
+					Modify the values accordingly before running.
+
+
+                     If not, please see the section below where I discuss some debugging strategies.
+
+                     <p><h4 style="color: rgb(34, 237, 122); font-size: 25px;">2&nbsp;:&nbsp;Stopping the daemons</h4></p>
+
+                      Manually<br> 
+
+					On the ResourceManager and NodeManager nodes:
+					<pre>$yarn-daemon.sh stop resourcemanager<br>$yarn-daemon.sh stop nodemanager</pre>
+					On the NameNode:
+					<pre>hadoop-daemon.sh --script hdfs stop namenode</pre>
+					On each DataNodes:
+					<pre>hadoop-daemon.sh --script hdfs stop datanode</pre>
+
+					<br>With scripts<br>
+					<pre>stop-yarn.sh<br>stop-dfs.sh</pre>
+
+					<p><h4 style="color: rgb(34, 237, 122); font-size: 25px;">3&nbsp;:&nbsp;Debugging</h4></p>
+
+				  	<p>In case any of the daemons fail to start, the first place to look will be the logs. You'll see the exact file the concerned daemon is logging to while you run the start script. Go to the HADOO_HOME/logs/ directory of the concerned node and view the .log file for traces of errors that might have come up. This is assuming that you have setup keyless SSH and /etc/hosts correctly and the scripts are able to reach all the nodes.
+				  	<br>You will find the stack trace of the exception in the logfile. If you feel like getting a fresh log file (since each run of the daemons will append its logging information to the log files and not clear the previous data there), you can perform a simple remove command on the log directory concerned after you have stopped all daemons and restart them again afterwards.
+				  	<pre>$rm -rvf /opt/hadoop/logs* </pre>
+				  	To automate this to all nodes, use the script to run jps on all nodes given above and replace the SCRIPT variable definition line with the following line,
+				  	<pre>#replace SCRIPT="/usr/local/jdk1.8.0_45/bin/jps;"<br>#with<br>SCRIPT="rm -rvf $HADOOP_HOME/logs/*"</pre>
+
+
+				  	<p>Two common exception people often face are the <i>BindException</i> and the <i> ConnectionRefused</i> exception.</p>
+
+				  	<p><b style="color: rgb(225, 15, 15); font-size: 30px;">BindException</b> occurs when a hadoop daemon attempts to bind to a post which is already being used by another process. From the stack trace in the log file, you can find the port which is causing problem.</p>
+				  	On the node causing the problem, run the following command to see the lists of ports and processes associated to it.
+				  	<pre>netstat -tulpn</pre>
+				  	A sample output will be of the form
+				  	<pre>Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 192.168.1.241:8020      0.0.0.0:*               LISTEN      1188/java       
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -               
+tcp        0      0 192.168.1.241:50071     0.0.0.0:*               LISTEN      1188/java       
+tcp        0      0 192.168.1.241:8088      0.0.0.0:*               LISTEN      1422/java       
+tcp        0      0 192.168.1.241:8025      0.0.0.0:*               LISTEN      1422/java       
+tcp        0      0 192.168.1.241:8026      0.0.0.</pre>
+
+				As you can see, the IP:port as well as the corresponding process/ID is seen. If you are sure what the process is, you can perform a kill -9 to kill the process and try to restart your daemons again. If you are not sure about the process, there is a good chance the port will be freed upon restart. In case that doesn't work its better to assign a different port to the daemon concerned by editing the configuration files in HADOOP_CONF_DIR. Consult the API to know more about the exact property you will have to modify.
+				To perform a kill -9
+				<pre>$kill -9 [processID]</pre>
+
+				<p><b style="color: rgb(225, 15, 15); font-size: 30px;">ConnectionRefusedException</b> occurs for the following <a href="http://wiki.apache.org/hadoop/ConnectionRefused" style="color: rgb(255, 207, 40);">cases </a>. For my particular case, the problem was because of all the machines having a 127.0.1.1 line maped to the hostmachine name. This problem can be resolved by removing that line.
+				</p>
+				Another problem I faced was host resolution related.
+				<p><b style="color: rgb(225, 15, 15); font-size: 30px;">Host resolution errors</b> were caused by all my VMs having the same name on the network. I fixed this by editing the /etc/hostname file to change my hostname and the edit etc/hosts on all nodes to reflect these changes.
+				</p>
+
+				Finally, most of my web apps including tracking UIs failed to start for the first time.
+
+				<p><b style="color: rgb(225, 15, 15); font-size: 30px;">Web app and Tracking UI</b> connection problems are usually due to wrong IP configurations in the configuration file. In your browser, look at the web-app link which refused to open correctly and see if that is the actual expected link. If that doesn't make sense or you are not sure, visit the apache API again, search for the property corresponding to the app which is not working for you. Chances are there is a default value and port defined to it (possibly inherited from some other setting). Usually the default IP is 0.0.0.0. You should override this according to your setup. </p>
+
+				<p><h4 style="color: rgb(34, 237, 122); font-size: 25px;">4&nbsp;:&nbsp;Running MapReduce Examples</h4></p>
+
+
+				<p> After you have everything up and running, its time to check and run a few examples. We will try to run the grep example which comes with the hadoop package</p>
+
+
+				First, create the directory to store data for the hadoop user.
+				<pre>$hadoop fs -mkdir /user<br>$hadoop fs -mkdir /user/hadoop</pre>
+
+				Then, put the configuration file directory as the input.
+
+				<pre>hadoop fs -put /home/hadoop/hadoop/etc/hadoop /user/hadoop/hadoop-config</pre>
+				ls to check the content
+				<pre>$hadoop fs -ls /user/hadoop/hadoop-config
+				</pre>
+				You should see the configuration files listed.<br>
+				To run the grep now
+				<pre>cd
+hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar grep /user/hadoop/hadoop-config /user/hadoop/output 'dfs[a-z.]+' </pre>
+
+It will print status as follows if everything works well.
+<pre>
+14/09/05 07:54:36 INFO client.RMProxy: Connecting to ResourceManager at biot/10.0.3.31:8032
+14/09/05 07:54:37 WARN mapreduce.JobSubmitter: No job jar file set.  User classes may not be found. See Job or Job#setJar(String).
+14/09/05 07:54:37 INFO input.FileInputFormat: Total input paths to process : 26
+14/09/05 07:54:37 INFO mapreduce.JobSubmitter: number of splits:26
+14/09/05 07:54:37 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1409903409779_0001
+14/09/05 07:54:37 INFO mapred.YARNRunner: Job jar is not present. Not adding any jar to the list of resources.
+14/09/05 07:54:38 INFO impl.YarnClientImpl: Submitted application application_1409903409779_0001
+14/09/05 07:54:38 INFO mapreduce.Job: The url to track the job: http://biot:8088/proxy/application_1409903409779_0001/
+14/09/05 07:54:38 INFO mapreduce.Job: Running job: job_1409903409779_0001
+14/09/05 07:54:45 INFO mapreduce.Job: Job job_1409903409779_0001 running in uber mode : false
+14/09/05 07:54:45 INFO mapreduce.Job:  map 0% reduce 0%
+14/09/05 07:54:50 INFO mapreduce.Job:  map 23% reduce 0%
+14/09/05 07:54:52 INFO mapreduce.Job:  map 81% reduce 0%
+14/09/05 07:54:53 INFO mapreduce.Job:  map 100% reduce 0%
+14/09/05 07:54:56 INFO mapreduce.Job:  map 100% reduce 100%
+14/09/05 07:54:56 INFO mapreduce.Job: Job job_1409903409779_0001 completed successfully
+14/09/05 07:54:56 INFO mapreduce.Job: Counters: 49
+	File System Counters
+		FILE: Number of bytes read=319
+		FILE: Number of bytes written=2622017
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+		HDFS: Number of bytes read=65815
+		HDFS: Number of bytes written=405
+		HDFS: Number of read operations=81
+		HDFS: Number of large read operations=0
+		HDFS: Number of write operations=2
+	Job Counters
+		Launched map tasks=26
+		Launched reduce tasks=1
+		Data-local map tasks=26
+		Total time spent by all maps in occupied slots (ms)=116856
+		Total time spent by all reduces in occupied slots (ms)=3000
+		Total time spent by all map tasks (ms)=116856
+		Total time spent by all reduce tasks (ms)=3000
+		Total vcore-seconds taken by all map tasks=116856
+		Total vcore-seconds taken by all reduce tasks=3000
+		Total megabyte-seconds taken by all map tasks=119660544
+		Total megabyte-seconds taken by all reduce tasks=3072000
+	Map-Reduce Framework
+		Map input records=1624
+		Map output records=23
+		Map output bytes=566
+		Map output materialized bytes=469
+		Input split bytes=3102
+		Combine input records=23
+		Combine output records=12
+		Reduce input groups=10
+		Reduce shuffle bytes=469
+		Reduce input records=12
+		Reduce output records=10
+		Spilled Records=24
+		Shuffled Maps =26
+		Failed Shuffles=0
+		Merged Map outputs=26
+		GC time elapsed (ms)=363
+		CPU time spent (ms)=15310
+		Physical memory (bytes) snapshot=6807674880
+		Virtual memory (bytes) snapshot=32081272832
+		Total committed heap usage (bytes)=5426970624
+	Shuffle Errors
+		BAD_ID=0
+		CONNECTION=0
+		IO_ERROR=0
+		WRONG_LENGTH=0
+		WRONG_MAP=0
+		WRONG_REDUCE=0
+	File Input Format Counters
+		Bytes Read=62713
+	File Output Format Counters
+		Bytes Written=405
+14/09/05 07:54:56 INFO client.RMProxy: Connecting to ResourceManager at biot/10.0.3.31:8032
+14/09/05 07:54:56 WARN mapreduce.JobSubmitter: No job jar file set.  User classes may not be found. See Job or Job#setJar(String).
+14/09/05 07:54:56 INFO input.FileInputFormat: Total input paths to process : 1
+14/09/05 07:54:56 INFO mapreduce.JobSubmitter: number of splits:1
+14/09/05 07:54:56 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1409903409779_0002
+14/09/05 07:54:56 INFO mapred.YARNRunner: Job jar is not present. Not adding any jar to the list of resources.
+14/09/05 07:54:56 INFO impl.YarnClientImpl: Submitted application application_1409903409779_0002
+14/09/05 07:54:56 INFO mapreduce.Job: The url to track the job: http://biot:8088/proxy/application_1409903409779_0002/
+14/09/05 07:54:56 INFO mapreduce.Job: Running job: job_1409903409779_0002
+14/09/05 07:55:02 INFO mapreduce.Job: Job job_1409903409779_0002 running in uber mode : false
+14/09/05 07:55:02 INFO mapreduce.Job:  map 0% reduce 0%
+14/09/05 07:55:07 INFO mapreduce.Job:  map 100% reduce 0%
+14/09/05 07:55:12 INFO mapreduce.Job:  map 100% reduce 100%
+14/09/05 07:55:13 INFO mapreduce.Job: Job job_1409903409779_0002 completed successfully
+14/09/05 07:55:13 INFO mapreduce.Job: Counters: 49
+	File System Counters
+		FILE: Number of bytes read=265
+		FILE: Number of bytes written=193601
+		FILE: Number of read operations=0
+		FILE: Number of large read operations=0
+		FILE: Number of write operations=0
+		HDFS: Number of bytes read=527
+		HDFS: Number of bytes written=179
+		HDFS: Number of read operations=7
+		HDFS: Number of large read operations=0
+		HDFS: Number of write operations=2
+	Job Counters
+		Launched map tasks=1
+		Launched reduce tasks=1
+		Data-local map tasks=1
+		Total time spent by all maps in occupied slots (ms)=2616
+		Total time spent by all reduces in occupied slots (ms)=2855
+		Total time spent by all map tasks (ms)=2616
+		Total time spent by all reduce tasks (ms)=2855
+		Total vcore-seconds taken by all map tasks=2616
+		Total vcore-seconds taken by all reduce tasks=2855
+		Total megabyte-seconds taken by all map tasks=2678784
+		Total megabyte-seconds taken by all reduce tasks=2923520
+	Map-Reduce Framework
+		Map input records=10
+		Map output records=10
+		Map output bytes=239
+		Map output materialized bytes=265
+		Input split bytes=122
+		Combine input records=0
+		Combine output records=0
+		Reduce input groups=5
+		Reduce shuffle bytes=265
+		Reduce input records=10
+		Reduce output records=10
+		Spilled Records=20
+		Shuffled Maps =1
+		Failed Shuffles=0
+		Merged Map outputs=1
+		GC time elapsed (ms)=20
+		CPU time spent (ms)=2090
+		Physical memory (bytes) snapshot=415334400
+		Virtual memory (bytes) snapshot=2382364672
+		Total committed heap usage (bytes)=401997824
+	Shuffle Errors
+		BAD_ID=0
+		CONNECTION=0
+		IO_ERROR=0
+		WRONG_LENGTH=0
+		WRONG_MAP=0
+		WRONG_REDUCE=0
+	File Input Format Counters
+		Bytes Read=405
+	File Output Format Counters
+		Bytes Written=179
+</pre>
+After the grep execution finishes, we can check the results. We can check the content in the output directory by:
+<pre>
+hdfs dfs -ls /user/hadoop/output/
+</pre>
+It should print output as follows.
+<pre>
+Found 2 items
+-rw-r--r--   3 hadoop supergroup          0 2014-09-05 07:55 /user/hadoop/output/_SUCCESS
+-rw-r--r--   3 hadoop supergroup        179 2014-09-05 07:55 /user/hadoop/output/part-r-00000
+</pre>
+part-r-00000 contains the result. Check it out and enjoy :)
+<p>
+Please inform me if you spot any errors or can suggest any improvement to the article. You can email me at donkdennis [at] gmail [dot] com .</p>
+                  </div>
+            </div>
+        </div>
+    </article>
+
+<!--Discuss-->
+<div class="disqus_comments" style="width: 70%; margin-left:auto; margin-right:auto;">
+    
+    <div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = 'dkdennis';
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+</div>
+      <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+<!--                        <li>
+                            <a href="http://www.facebook.com">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://www.facebook.com">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+-->                       </li>
+                        <li>
+                            <a href="https://github.com/metastableB/bigDataExperiments">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="copyright text-muted">Don Dennis 2015</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="../../js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../../js/bootstrap.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../../js/clean-blog.min.js"></script>
+
+</body>
+
+</html>
