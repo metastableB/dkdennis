@@ -77,7 +77,7 @@
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="post-heading">
                         <h1>Hadoop Yarn: Setting Up A Multinode Cluster</h1>
-                        <span class="meta">Last Update on May 2, 2015</span>
+                        <span class="meta">Last Update on May 19, 2015</span>
                     </div>
                 </div>
             </div>
@@ -109,7 +109,7 @@
                     	</ul> 
                     Though this tutorial will still be valid for any Linux distro and Hadoop Yarn version (2.x). </p>
 
-                    <p>The usual set-up first designates one of the node as NameNode and others as DataNodes. Since I had 10 VMs, I used 1 of them as a NameNode (as well as the resource manager as we will see later) and 8 others as DataNode. I sat aside 1 VM as a single node setup for other testing purposes (irrelevant here).</p>
+                    <p>The usual set-up first designates one of the node as NameNode and others as DataNodes. Since I had 10 VMs, I used 1 of them as a NameNode (as well as the resource manager as we will see later) and 8 others as DataNode. I set aside 1 VM as a single node setup for other testing purposes (irrelevant here).</p>
 
                     <p>In case you have fewer node, you might want to run a DataNode daemon on you NameNode machine as well. I'll mention below what all the changes you will have to make (there is just one change actually). </p>
 
@@ -123,14 +123,12 @@
                     <p>Adding a new system group and user is recommended so that your hadoop setup and filesytem remain isolated from other system users. You can skip this step if you are absolutely sure this wont be necessary ( I personally did not bother do set this up, again not recommended).
                     </p>
                     <p>To set up a new user hadoop in the hduser, follow the following commands in all nodes<p>
-                    <pre>sudo addgroup hadoop  
-					<br>sudo adduser --ingroup hadoop hduser  
-					<br>sudo adduser hduser sudo</pre>
+                    <pre>$sudo addgroup hadoop <br>$sudo adduser --ingroup hadoop hduser<br>$sudo adduser hduser sudo</pre>
 					</p>
 					<p>Make sure you understand the above commands and what they are doing. For all the next steps log in as 'hadoop' on all nodes</p>
 
 					<p>
-					<h5>1.1 &nbsp;:&nbsp;Mapping the nodes</h5>
+					<h5>1.2 &nbsp;:&nbsp;Mapping the nodes</h5>
                     </p>
                     <p>We will add the node information by adding the IPs of all the nodes (including the local node) to the <i>/etc/hosts</i> file of each node.</p>
                     Open your hosts file for editing.
@@ -139,7 +137,7 @@
                     <br> Append the following : One Entry per line<br>
                     <pre>192.168.1.241&nbsp;&nbsp;&nbsp;Master<br>192.168.1.242&nbsp;&nbsp;&nbsp;Slave0<br>192.168.1.243&nbsp;&nbsp;&nbsp;Slave1<br>192.168.1.244&nbsp;&nbsp;&nbsp;Slave2<br>192.168.1.245&nbsp;&nbsp;&nbsp;Slave3<br>192.168.1.246&nbsp;&nbsp;&nbsp;Slave4<br>192.168.1.247&nbsp;&nbsp;&nbsp;Slave5<br>192.168.1.248&nbsp;&nbsp;&nbsp;Slave6<br>192.168.1.249&nbsp;&nbsp;&nbsp;Slave7</pre>
 
-                    <p> Note : Ubuntu is notorious for having the 127&nbsp;.&nbsp;0&nbsp;.&nbsp;1&nbsp;.&nbsp;1 entry mapped to the hostname of your machine in /etc/hosts . Replace it with the network IP of your host. Do not touch the local host entry though.<br><br>Also make sure all your machines have different names on the network. Usually while creating VMs, one machine is created and replicated to the number of times you want. This may lead to all of them having the same name on the network. To edit the machine name of the network, open <i> /etc/hostname </i>file with your favourite editor and replace the current machine name (which you will find there) with the new name you want. Make sure to use this in the <i>/etc/hosts</i> for all the nodes as well.</p> 
+                    <p> Note : Ubuntu is notorious for having the 127&nbsp;.&nbsp;0&nbsp;.&nbsp;1&nbsp;.&nbsp;1 entry mapped to the hostname of your machine in /etc/hosts . Replace it with the network IP of your host. Do not modify the localhost entry though.<br><br>Also make sure all your machines have different names on the network. Usually while creating VMs, one machine is created and replicated to the number of times you want. This may lead to all of them having the same name on the network. To edit the machine name of the network, open <i> /etc/hostname </i>file with your favourite editor and replace the current machine name (which you will find there) with the new name you want. Make sure to use this in the <i>/etc/hosts</i> for all the nodes as well.</p> 
 
                     <p>
                     <h5>1.3 &nbsp;:&nbsp;Password-less SSH</h5>
@@ -154,7 +152,7 @@
                     <h4 style="color: rgb(34, 237, 122); font-size: 25px;">2&nbsp;:&nbsp;Java</h4>
 
                     </p>
-                    <p>Hadoop required java on your system. Type <i>java -version</i> on your terminal to see if you have java already installed. If the java version is echoed to the console, you can skip the downloading part. Though you still need to verify if the environment variables are set. Else download and setup java on all your nodes as instructed below. Actually you may find it easier to download java on one node and copy it the others. Use the linux tool <i>scp</i> for that. Even still you have to correctly set the environment variables</p>
+                    <p>Hadoop requires java on your system. Type <i>java -version</i> on your terminal to see if you have java already installed. If the java version is echoed to the console, you can skip the downloading part. Though you still need to verify if the environment variables are set. Else download and setup java on all your nodes as instructed below. Actually you may find it easier to download java on one node and copy it the others. Use the linux tool <i>scp</i> for that. Even still you have to correctly set the environment variables</p>
 
                     <p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" style="color: rgb(255, 207, 40);">Download</a> the latest jdk. Extract it  within the home folder (or any location of your choice). I prefer to keep java in my <i>/usr/local/</i> directory. First extract the .tar.gz file you downloaded to a folder in your home directory, say jdk1.8.0_45, and then move it to your /usr/local directory. (or where ever you chose to move it to, but its better to stick to this directory).</p>
                     Downloading java
@@ -164,7 +162,7 @@
                     Moving to the /user/local directory.
                     <pre>sudo mv -v /home/hadoop/jdk1.8.0_45 /usr/local</pre>
                     The -v flag for verbose output (prints a lot on the screen as you will see).<br>
-                    To copy to the other nodes, use scp as follows
+                    To copy to the other nodes, use scp as follows ( repeat the above extract and move step on all nodes, as well as the below steps to set up the environment )
                     <pre>$scp -v /home/hadoop/Downloads/jdk-8u45-linux-x64.tar.gz hadoop@Slave0:~/Downloads/</pre>
                     
                     <p>Once you have java, you need to tell your environment that you have java. For that we set two environment variables, namely <i>$PATH</i> and <i>$JAVA_HOME</i>. We export the java installation directory and set the environment variables.</p>
@@ -177,20 +175,24 @@
                     Make sure to change the installation path according to where you have set java.
                     <p>Now check if java is installed correctly on your machine with the following command. It should print the java version. You may have to restart the terminal session for your changes to the .bashrc file (if any) to take effect.</p>
                     <p><pre>java -version</pre></p>
+                     Sample output:
+                    <pre>java version "1.8.0_45"
+Java(TM) SE Runtime Environment (build 1.8.0_45-b14)
+Java HotSpot(TM) 64-Bit Server VM (build 25.45-b02, mixed mode)</pre><br>
                     
                     <h4 style="color: rgb(34, 237, 122); font-size: 25px;">3&nbsp;:&nbsp;Downloading a Hadoop</h4>
-                    <p>Download the latest hadoop stable version form the <a href="http://apache.claz.org/hadoop/common/" style="color: rgb(255, 207, 40);">apache webpage</a> to your master node and one slave node. Extract your download to a directory of your choice within the file system. A very common and highly recommended choice is /opt/. Extract the contents of the file you downloaded to a new folder in /opt/ named hadoop. Make sure the user we created above, hadoop, has read write permissions to this folder.</p>
+                    <p>Download the latest hadoop stable version form the <a href="http://apache.claz.org/hadoop/common/" style="color: rgb(255, 207, 40);">apache webpage</a> to your master node and copy it across all nodes. Extract your download to a directory of your choice within the file system. A very common and highly recommended choice is /opt/. Extract the contents of the file you downloaded to a new folder in /opt/ named hadoop. Make sure the user we created above, hadoop, has read write permissions to this folder.</p>
 
                     To download the file you can use
                     <pre>$wget http://apache.claz.org/hadoop/common/hadoop-2.7.0/hadoop-2.7.0.tar.gz</pre>
+                    To copy to other nodes use,
+                    <pre>$scp -v /your/hadoop/tar.gzfile hadoop@Slave0:~/Downloads</pre>
                     To extract the contents of the tar.gz file use
                     <pre>$tar xvzf hadoop-2.7.0.tar.gz </pre>
                     To move the extracted contents to /opt/hadoop use
                     <pre>$mv -v hadoop-2.7.0/* opt/hadoop</pre>
-                    To copy to other nodes use,
-                    <pre>$scp -v /your/hadoop/tar.gzfile hadoop@Slave0:~/Downloads</pre>
-
-                   	<p>Now, as with java, we have to tell the environment that we have setup hadoop. First we set up the $HADOOP_HOME, $PATH environment variables. As done above for java,export the hadoop installation directory and set the environment variables</p>
+                    Perform the extract and move steps on all nodes.
+                   	<p>Now, as with java, we have to tell the environment that we have setup hadoop. First we set up the $HADOOP_HOME, $PATH environment variables on all nodes. As done above for java,export the hadoop installation directory and set the environment variables</p>
 
                     <pre>export HADOOP_HOME=/opt/hadoop<br>export PATH=$PATH:/opt/hadoop/bin:/opt/hadoop/sbin</pre>
 
@@ -199,8 +201,16 @@
 
                     <p>Verify the hadoop installation on all nodes by printing the hadoop version</p>
                     <pre>$hadoop version</pre>
+                    Sample output:
+                    <pre>Hadoop 2.7.0
+Subversion https://git-wip-us.apache.org/repos/asf/hadoop.git -r d4c8d4d4d203c934e8074b31289a28724c0842cf
+Compiled by jenkins on 2015-04-10T18:40Z
+Compiled with protoc 2.5.0
+From source with checksum a9e90912c37a35c3195d23951fd18f
+This command was run using /usr/local/hadoop/share/hadoop/common/hadoop-common-2.7.0.jar
+</pre>
 
-                    Add the remaining environmental variables as well to the .bashrc file. Append the following to the .bashrc file using your favourite editor.
+                    Add the remaining environmental variables as well to the .bashrc file on all nodes. Append the following to the .bashrc file using your favourite editor.
                     <pre>export HADOOP_INSTALL=/opt/hadoop<br>export PATH=$PATH:$HADOOP_INSTALL/bin<br>export PATH=$PATH:$HADOOP_INSTALL/sbin<br>export HADOOP_MAPRED_HOME=$HADOOP_INSTALL<br>export HADOOP_COMMON_HOME=$HADOOP_INSTALL<br>export HADOOP_HDFS_HOME=$HADOOP_INSTALL<br>export YARN_HOME=$HADOOP_INSTALL<br>export HADOOP_HOME=$HADOOP_INSTALL<br>export HADOOP_CONF_DIR=${HADOOP_HOME}"/etc/hadoop"</pre>
 
                     <h4 style="color: rgb(34, 237, 122); font-size: 25px;">4&nbsp;:&nbsp;Configuring Hadoop</h4>
@@ -280,7 +290,7 @@
     </property>
 </configuration>
 </xmp></pre>
-<p>Again, remember to use your own IPs. Also, it is better if you understand what the properties actually mean. This will help debugging in case you encounter any errors. Check out the official API for more information.</p>
+                <p>Again, remember to use your own IPs. Also, it is better if you understand what the properties actually mean. This will help debugging in case you encounter any errors. Check out the <a href="http://hadoop.apache.org/docs/r1.2.1/cluster_setup.html" style="color: rgb(255, 207, 40);">official API</a> for more information.</p>
 
 				 	<p>
                     <h5>4.2 &nbsp;:&nbsp;Configuring the datanode</h5>
@@ -384,8 +394,8 @@
 				<pre>export JAVA_HOME=/usr/local/jdk1.8.0_45</pre>
 
 				<p>Phew! That should do it.</p>
-				TODO:
-				<ul>
+				Lets <a href="#" style="color: rgb(255, 207, 40);">perform some testing </a> shall we ?
+				<ul>TODO
 					<li>Testing</li>
 					<li>Common examples</li>
 					<li>accessing logs</li>
